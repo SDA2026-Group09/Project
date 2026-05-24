@@ -1,0 +1,45 @@
+@startuml C4_container
+!include <C4/C4_Container>
+
+title Container diagram - Processing
+
+Person(user, "User", "Student/Designer")
+
+System_Boundary(processing4, "Processing 4"){
+    Container(pde, "PDE", "Java", "PDE (processing development environment) is the user interface that allows to write and handle a sketch.")
+    Container(java_mode, "Java mode", "Java", "Version of the processing language based on Java. It handles all the sketch lifecycle: preprocessing, compilation, built, execution. It offers also the possibility to debug the code and use the tweak mode.")
+    'Container(core, "Processing core", "Java", "Fundamental processing core that expose the PApplet base class and the drawing APIs invoked by the sketches.")
+    Container(sketch_process, "Sketch Process", "JVM child process", "Isolated JVM process that runs the compiled sketch. Hosts the PApplet instance and the active renderer engine.")
+    Container(contribution_manager, "Contribution Manager", "Java", "Manages installation, update and removal of libraries, modes, tools and examples.")
+}
+
+'System_Ext(embedded_hardware, "Embedded hardware", "Embedded hardware (like Raspberry and Arduino) that sends or receives data to process. It can display the sketches.")
+System_Ext(os, "Operating system", "It handles the access to the computer's files and to accelerated hardware")
+System_Ext(processing_server, "Processing server", "Hosts contributed libraries, modes, tools and release updates.")
+System_Ext(external_ide, "External IDE", "External IDE that want to use the processing language.")
+
+/' User relationships '/
+Rel(user, pde, "Writes sketches and triggers execution")
+Rel(user, java_mode, "Writes commands on CLI")
+
+/' PDE relationship '/ 
+Rel(pde, java_mode, "Send the .pde sketch files")
+Rel(pde, os, "File I/O: sketches, preferences, settings", "OS API")
+Rel(pde, contribution_manager, "Opens and controls")
+
+/' Contribution manager relationship'/
+Rel(contribution_manager, processing_server, "Queries catalogue and downloads packages", "HTTPS")
+
+/' Java mode relationship '/
+'Rel(java_mode, core, "Includes core in classpath for compilation")
+Rel(java_mode, sketch_process, "Spawns and monitors", "Sockets")
+Rel(java_mode, os, "File I/O: temp build files; spawns child JVM", "OS API")
+
+/' Sketch process relationship '/
+'Rel(sketch_process, embedded_hardware, "Communicates", "Serial")
+Rel(sketch_process, os, "Rendering (GPU/CPU), file I/O, native events", "Java2D / JOGL")
+
+/' External IDE '/
+Rel(external_ide, java_mode, "Sends .pde files")
+
+@enduml
