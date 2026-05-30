@@ -3,17 +3,20 @@
 
 title Component diagram — PDE (processing development environment)
 
-Person(user, "User", "Student / Designer")
+/' Persons '/
+Person(user, "User", "Person who wants easily learn how to create graphic animations or quickly create a prototype.")
 
+/' Components '/
 Container_Boundary(pde, "PDE") {
-    Component(app_core, "Application core", "Java", "Entry point of the software. It manages the editor windows, the active mode (java, pyhton, ...), the open sketches, and the user preferences.")
+    Component(app_core, "Application core", "Java", "Entry point of the software. It manages the editor windows, the active mode (Java, Python, ...), the open sketches, and the user preferences.")
     Component(ui_layer, "UI layer", "Java / Swing / AWT", "It contains all graphical widgets such as the editor, tool bar, and console.")
     Component(theme_system, "Theme system", "Java / SVG", "Loads theme.txt and SVG icons at startup. Provides colours, fonts and icon assets to the entire UI layer.")
     Component(mode_host, "Mode host", "Java", "It handles language-specific extensions and actively delegates sketch preprocessing, building, and runtime execution to the selected programming mode.")
     Component(tools_host, "Tools host", "Java", "It is the extensible framework component that manages the lifecycle of third-party plugins. It dynamically discovers, loads, and executes external modules through a standardized API.")
-    Component(platform_layer, "Platform layer", "Java / JNI", "It is a OS abstraction. It contains subclasses for macOS, Windows and Linux for handling file paths, sketchbook location, and preferences path.")
+    Component(platform_layer, "Platform layer", "Java / JNI", "It is an OS abstraction. It contains subclasses for macOS, Windows and Linux for handling file paths, sketchbook location, and preferences path.")
 }
 
+/' External systems and containers '/
 Container(java_mode, "Java mode", "Java", "Version of the processing language based on Java. It handles all the sketch lifecycle: preprocessing, compilation, built, execution. It offers also the possibility to debug the code and use the tweak mode.")
 Container(contribution_manager, "Contribution Manager", "Java", "Manages installation, update and removal of libraries, modes, tools and examples.")
 System_Ext(os, "Operating system", "It handles the access to the computer's files and to accelerated hardware")
@@ -22,25 +25,26 @@ System_Ext(os, "Operating system", "It handles the access to the computer's file
 Rel(user, ui_layer, "Writes code and triggers actions", "GUI")
 
 /' Application core relationships '/ 
-Rel(app_core, theme_system, "Loads at startup")
-Rel(app_core, platform_layer, "Delegates file path resolution and OS-specific operations")
-Rel(app_core, mode_host, "Initializes and switches modes")
-Rel(app_core, ui_layer, "Creates and handles an editor windows")
+Rel(app_core, theme_system, "Loads at startup", "Method call")
+Rel(app_core, platform_layer, "Delegates file path resolution and OS-specific operations", "Method call")
+Rel(app_core, mode_host, "Initializes and switches modes", "Method call")
+Rel(app_core, ui_layer, "Creates and handles an editor windows", "Method call")
+Rel(app_core, contribution_manager, "Opens manager window on user request", "Method call")
+
+/' Tool host relationships '/
+Rel(tools_host, platform_layer, "Requests tool files", "Method call")
 
 /' UI relationships '/ 
-Rel(ui_layer, app_core, "Reads sketch model and preferences")
-Rel(ui_layer, theme_system, "Requests colours, fonts and icons")
-Rel(ui_layer, tools_host, "Triggers tool execution")
-Rel(ui_layer, contribution_manager, "Opens manager window on user request")
+Rel(ui_layer, theme_system, "Requests colours, fonts and icons", "Method call")
+Rel(ui_layer, tools_host, "Triggers tool execution", "Method call")
 
 /' Mode host relationships '/
-Rel(mode_host, java_mode, "Forwards sketch files and receives errors and events.")
-Rel(java_mode, mode_host, "Receives errors and events.")
+Rel(mode_host, java_mode, "Forwards sketch files / Receives errors and events.", "Method call")
 
 /' Platform relationships '/
-Rel(platform_layer, os, "File I/O: sketch files, preferences.txt, temp folders; windowing and desktop integration", "OS API / JNI")
+Rel(platform_layer, os, "File I/O: sketch files, preferences.txt, temp folders; windowing and desktop integration", "OS API")
 
 /' Theme relationships '/ 
-Rel(theme_system, os, "File I/O")
+Rel(theme_system, platform_layer, "Requests configuration files", "Method call")
 
 @enduml

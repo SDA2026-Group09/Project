@@ -3,22 +3,21 @@
 
 title Context diagram - Processing 
 
-Person(student, "Student", "User that wants to easily learn how to create graphic animations.")
-Person(designer, "Designer", "User that wants to quickly create a prototype.")
+/' Persons '/
+Person(user, "User", "Person who wants easily learn how to create graphic animations or quickly create a prototype.")
 
-System(processing4, "Processing 4", "Software sketchbook and Java-based programming language")
-'System_Ext(embedded_hardware, "Embedded hardware", "Embedded hardware (like Raspberry and Arduino) that sends or receives data to process. It can display the sketches.")
-System_Ext(os, "Operating system", "It handles the access to the computer's files and for the graphic rendering")
+/' Systems '/
+System(processing4, "Processing", "Software sketchbook and Java-based programming language")
+System_Ext(os, "Operating system", "It handles the access to the computer's files and to accelerated hardware")
 System_Ext(processing_server, "Processing server", "Hosts contributed libraries, modes, tools and release updates.")
-System_Ext(external_ide, "External IDE", "External IDE that want to use the processing language.")
+System_Ext(external_ide, "External IDE", "External IDE that wants to use the processing language.")
 
 /' Person relationships '/
-Rel(student, processing4, "Writes and executes educational code sketches")
-Rel(designer, processing4, "Creates interactive graphics and prototypes")
+Rel(user, processing4, "Writes and executes educational code sketches", "GUI")
 
 /' External component relationships '/
-Rel(processing4, os, "Send data and requests")
+Rel(processing4, os, "Sends data and requests", "OS API")
 Rel(processing4, processing_server, "Queries catalogue and downloads packages", "HTTPS")
-Rel(external_ide, processing4, "Sends .pde files")
+Rel(external_ide, processing4, "Calls the build tools", "CLI")
 
 @enduml
