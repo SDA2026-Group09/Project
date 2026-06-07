@@ -11,7 +11,7 @@ The second external system is the Processing Server. This server hosts contribut
 The third external system is an External IDE. Modern development environments such as Visual Studio Code or IntelliJ IDEA can interact with Processing through command-line tools and language services. This enables developers to use Processing outside its default development environment while still benefiting from its compilation and execution capabilities.
 The context diagram shows that Processing acts as a bridge between users, operating-system resources, online repositories, and external development tools. Although users experience Processing as a simple educational environment, the system actually coordinates several external services behind the scenes.
 
-![Context Diagram](./images/context-diagram.png)
+![Context Diagram](./img/context-diagram.png)
 
 ---
 
@@ -25,7 +25,7 @@ The relationships between these containers demonstrate a clear separation of res
 Another important aspect of the design is process isolation. Instead of executing user sketches directly inside the PDE, Processing launches a dedicated runtime process. This reduces coupling between development tools and runtime execution while improving fault tolerance. If a sketch crashes, the IDE can continue operating normally.
 Overall, the container architecture demonstrates a strong separation between interface concerns, execution concerns, runtime concerns, and package-management concerns.
 
-![Container Diagram](./images/container-diagram.png)
+![Container Diagram](./img/container-diagram.png)
 
 ## 3. Component Diagrams and SOLID Violations
 
@@ -37,7 +37,7 @@ The Mode Host is responsible for communicating with language-specific modes such
 The Tools Host provides support for plugins and external tools. This component improves extensibility because new functionality can be added independently from the core system.
 Finally, the Platform Layer acts as an operating-system abstraction. It provides platform-specific services while shielding the rest of the application from implementation details.
 
-![PDE Component Diagram](./images/pde-component-diagram.png)
+![PDE Component Diagram](./img/pde-component-diagram.png)
 
 ### Java Mode Component Diagram
 Java Mode contains the components responsible for transforming Processing code into executable applications.
@@ -51,7 +51,7 @@ The Tweak Mode allows runtime modification of certain values without requiring r
 The LSP Server exposes code intelligence services to external editors through the Language Server Protocol.
 Finally, the CLI enables Processing projects to be compiled and executed without opening the PDE.
 
-![Java Mode Component Diagram](./images/java-mode-component-diagram.png)
+![Java Mode Component Diagram](./img/java-mode-component-diagram.png)
 
 ### Sketch Process Component Diagram
 The Sketch Process contains the runtime environment used to execute sketches.
@@ -62,7 +62,7 @@ The Render Engine (PGraphics) performs all graphics operations and supports diff
 The Resource Management component loads and manages images, fonts, and other assets required by the sketch.
 Together, these components provide the complete runtime environment for graphical applications.
 
-![Sketch Process Component Diagram](./images/sketch-process-component-diagram.png)
+![Sketch Process Component Diagram](./img/sketch-process-component-diagram.png)
 
 ---
 
