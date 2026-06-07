@@ -1,6 +1,6 @@
 # Processing 4 Architecture Analysis Report
 
-This repository contains a comprehensive architectural analysis of the Processing 4 software system, evaluating its structural patterns, component breakdowns, SOLID design principles, and alignment with Clean Architecture concepts.
+This repository contains a comprehensive architectural analysis of the Processing 4 software system, evaluating its structural patterns, component breakdowns, SOLID design principles, and alignment with Clean Architecture concepts. For doing the C4 diagrams, the C4-plantUML tool has been used. 
 ---
 
 ## 1. Context Diagram
@@ -19,7 +19,7 @@ The context diagram shows that Processing acts as a bridge between users, operat
 The container diagram decomposes Processing into four major containers: the PDE, Java Mode, Sketch Process, and Contribution Manager.
 The PDE (Processing Development Environment) is the graphical application used by developers. It contains the code editor, menus, toolbar, console, and project management features. Users interact directly with the PDE when creating and running sketches. However, the PDE itself does not compile or execute code. Instead, it delegates these responsibilities to specialized containers.
 The Java Mode container implements Processing's Java-based programming language. It is responsible for preprocessing source files, compiling code, launching sketches, debugging applications, and performing background error checking. Java Mode acts as the execution coordinator for Processing sketches and provides most of the language-specific functionality.
-When a user runs a sketch, Java Mode launches the Sketch Process, which is a separate Java Virtual Machine responsible for executing the compiled application. This separation improves reliability because crashes occurring inside a sketch do not directly affect the PDE. The Sketch Process contains the runtime environment, including rendering engines, animation management, event handling, and resource loading.
+When a user runs a sketch, Java Mode launches the Sketch Process, which is a separate Java Virtual Machine responsible for executing the compiled application. This separation improves reliability because crashes occurring inside a sketch do not directly affect the PDE. The Sketch Process contains the runtime environment, including rendering engines, animation management, event handling, and resource loading. The repository that has been analyzed contains only the Java Mode but the Processing organization has other repositories that contain other language modes, such as Python and JavaScript.   
 The fourth container is the Contribution Manager. This component manages installation, updating, and removal of libraries, tools, examples, and programming modes. It communicates with the Processing Server through HTTPS and stores downloaded packages locally using operating-system services.
 The relationships between these containers demonstrate a clear separation of responsibilities. The PDE focuses on user interaction, Java Mode handles language processing, the Sketch Process executes code, and the Contribution Manager handles extensions. This modular architecture improves maintainability because each container has a well-defined purpose.
 Another important aspect of the design is process isolation. Instead of executing user sketches directly inside the PDE, Processing launches a dedicated runtime process. This reduces coupling between development tools and runtime execution while improving fault tolerance. If a sketch crashes, the IDE can continue operating normally.
@@ -58,11 +58,14 @@ The Sketch Process contains the runtime environment used to execute sketches.
 The central component is PApplet, which provides the programming API used by developers. Every sketch extends this class and gains access to drawing functions and event callbacks.
 The Animation Loop repeatedly executes setup() and draw() methods while maintaining the target frame rate.
 The Window Manager (PSurface) handles windows and user input while interacting directly with the operating system.
-The Render Engine (PGraphics) performs all graphics operations and supports different rendering backends.
+The Render Engine (PGraphics) performs all graphics operations and supports different rendering backends. It has several different implementations. The default renderer is called Java2D and is a 2D render engine CPU-based. The other options are Processing 2D and Processing 3D, which are based on GPU and allow users to increase rendering performance under heavy loads.
 The Resource Management component loads and manages images, fonts, and other assets required by the sketch.
 Together, these components provide the complete runtime environment for graphical applications.
 
 ![Sketch Process Component Diagram](./img/component_diagram_sketch_process.png)
+
+### Contribution Manager Component Diagram
+The Contribution Manager is a very simple container because it only contains a component for downloading the extensions from the server and another for saving them in a folder used by Processing application. For this reason, a component diagram is not needed. 
 
 ---
 
@@ -96,7 +99,7 @@ Therefore, Processing should be viewed as a modular layered architecture that ad
 ## 5. Architectural Characteristics
 Several architectural characteristics are particularly important in Processing.
 The first is simplicity. Processing was designed to make programming accessible to beginners, artists, and designers. The architecture supports this goal by hiding implementation complexity behind simple abstractions such as PApplet. Users can create visual applications with only a few lines of code while the system manages compilation, rendering, and execution internally.
-The second characteristic is extensibility. Processing includes multiple mechanisms that allow functionality to be expanded. The Contribution Manager supports installation of new libraries and tools, while the Tools Host and Mode Host provide extension points for plugins and language integrations. This extensibility has enabled a large ecosystem of community-developed packages.
+The second characteristic is extensibility. Processing includes multiple mechanisms that allow functionality to be expanded. The Contribution Manager supports installation of new libraries and tools, while the Tools Host and Mode Host provide extension points for plugins and language integrations. This extensibility has enabled a large ecosystem of community-developed packages. In addition, it offers the possibility of using the Processing language in different modes (like the Java mode and the Python mode) without changing the PDE or the graphic engines. 
 The third characteristic is portability. Processing is built on top of Java and runs on multiple operating systems. The Platform Layer further improves portability by isolating operating-system-specific functionality from the rest of the application. As a result, sketches can usually run on Windows, Linux, and macOS without modification.
 Another important characteristic is modularity. The separation into PDE, Java Mode, Sketch Process, and Contribution Manager create clear architectural boundaries. Each container has a specific responsibility, reducing complexity and improving maintainability.
 Finally, reliability is supported through process isolation. User sketches execute in a dedicated Sketch Process rather than inside the PDE. This means that runtime failures are less likely to crash the development environment itself. Such isolation improves stability and creates a better user experience.
