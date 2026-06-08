@@ -22,6 +22,8 @@ Processing is organised as three Java/Kotlin top-level modules with a clear laye
 - **`app/`** (~29 K LOC, 8 sub-packages) — the Processing Development Environment. It defines the editor window (`Editor`), session controller (`Base`), the syntax-highlighting text area, the console, the Contribution Manager, a Look-and-Feel layer, and a platform-abstraction layer that hides OS differences across macOS, Windows, and Linux. The PDE is designed to be language-agnostic and acquires language-specific behaviour from *mode* plug-ins.
 - **`java/`** (~22 K LOC, 5 sub-packages plus nested libraries) — the Java mode, which wires the PDE to actually run Java sketches. Its `preproc` package uses an ANTLR grammar (`Processing.g4`) to translate `.pde` files into Java; `runner` launches each compiled sketch in a separate JVM and pipes its output back to the editor; `debug` connects to that JVM through the Java Debug Interface; `lsp` exposes a Language Server Protocol endpoint for autocompletion and diagnostics; and `tweak` instruments running sketches so that numeric literals can be edited live via sliders. The nested `libraries/` directory bundles six extensions (DXF, SVG, PDF, networking, serial I/O, and Java I/O helpers).
 
+Two architectural choices shape how these modules interact at runtime. First, each user sketch runs in a separate JVM spawned by `runner` rather than inside the IDE process, which isolates sketch crashes from the editor and allows live inspection through the Java Debug Interface. Second, the editor and the language plug-in are deliberately decoupled: `app` knows nothing about Java specifically, and `java` is one possible implementation of an abstract `Mode` contract — a design originally intended to host alternative language modes such as Python and JavaScript, which live in sibling repositories.
+
 ```mermaid
 flowchart LR
     A[.pde sketch] -->|preprocessor<br/>ANTLR| B[Java source]
@@ -38,11 +40,18 @@ The full production codebase totals roughly 108 K lines of Java and Kotlin acros
 
 ## Code Statistics
 
-Statistics below are produced by `cloc` v2.06 on commit `HEAD` (2026-05-23) and cross-referenced against the GitHub REST API for contributor and activity figures.
+Statistics below are produced by `cloc` v2.06 on commit `HEAD` (2026-05-23) and cross-referenced against the GitHub REST API for contributor and activity figures. The commands used:
+
+```bash
+cloc --exclude-dir=.git,.idea,.github .          # repo-wide totals
+cloc --include-lang=Java,Kotlin <module>/        # per-module Java + Kotlin
+```
+
+`cloc` counts non-blank, non-comment source lines per language. The first command scans the whole repository and ignores git metadata, IDE settings, and GitHub workflow folders. The second restricts the count to Java and Kotlin files inside a given module to produce the per-module breakdown.
 
 | Metric | Value |
 |---|---|
-| Repository | github.com/processing/processing4 |
+| Repository | [github.com/processing/processing4](https://github.com/processing/processing4) |
 | Primary languages | Java (102 K LOC) + Kotlin (5.6 K LOC) |
 | Java + Kotlin production LOC | ~108 K across 381 files |
 | Total LOC, all languages | 146 K across 762 files |
@@ -59,4 +68,4 @@ Statistics below are produced by `cloc` v2.06 on commit `HEAD` (2026-05-23) and 
 | `app/` | 155 | 29,431 | 8 |
 | `java/` | 131 | 21,767 | 5 |
 
-`core` accounts for slightly over half of the Java/Kotlin production code while occupying the fewest files, reflecting the density of the rendering engine — `PApplet` and the OpenGL renderer in particular. Beyond Java and Kotlin, the repository ships roughly 17 K LOC of UI translation strings, 3 K LOC of Gradle and Ant scripts, 1.5 K LOC of ANTLR grammar defining the Processing language syntax, and 126 example `.pde` sketches that double as documentation. The `processing4` repository itself was created in August 2024 to host the version-4 line; the broader Processing project has accumulated contributions across predecessor repositories for over two decades.
+`core` accounts for slightly over half of the Java/Kotlin production code while occupying the fewest files, reflecting the density of the rendering engine — `PApplet` and the OpenGL renderer in particular. Beyond Java and Kotlin, the repository ships roughly 17 K LOC of UI translation strings, 3 K LOC of Gradle and Ant scripts, 1.5 K LOC of ANTLR grammar defining the Processing language syntax, and 126 example `.pde` sketches that double as documentation. The roughly 70/30 split between Java production code and this supporting content is unusual for a Java library and reflects Processing's dual identity as both a desktop application that users run directly and an embeddable engine that other applications can link against. The `processing4` repository itself was created in August 2024 to host the version-4 line; the broader Processing project has accumulated contributions across predecessor repositories for over two decades.
