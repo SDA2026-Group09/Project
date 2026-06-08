@@ -1,0 +1,68 @@
+@startuml C4_component_java_mode
+!include <C4/C4_Component>
+
+title Component Diagram — Java mode
+
+/' Components '/
+Container_Boundary(java_mode, "Java mode") {
+    Component(java_mode_coordinator, "Java mode coordinator", "Java", "It is the entry point of Java mode. It implements the standard IDE interface to enable Java development. It implements all the language-specific logic, such as preprocessing and compilation.")
+    Component(preprocessor, "Preprocessor", "Java / ANTLR4", "Transforms .pde source files into valid Java source.")
+    Component(compiler, "Compiler", "Java / Javac API", "Compiles the Java source produced by the preprocessor into .class bytecode. Collects and maps compilation errors back to original .pde line numbers.")
+    Component(runner, "Runner", "Java / ProcessBuilder", "Spawns the sketch process as an isolated child JVM. Manages its lifecycle (start, stop, restart) and communicates via sockets.")
+    Component(error_checker, "Error checker", "Java", "It runs in the background an incremental compilation to detect errors while the user types. Forwards error markers to the java editor UI.")
+    Component(debugger, "Debugger", "Java / JDI", "Manages breakpoints, step execution and variable inspection. It is attached to the running sketch process and it communicates using the Java Debug Wire Protocol.")
+    Component(tweak_mode, "Tweak mode", "Java", "It transforms the sketch code in order to inject numeric and color literals inside during its run time execution (without recompilation). It is an alternative for the standard preprocessing phase.")
+    Component(lsp_server, "Language server", "Java / LSP4J", "Exposes code intelligence endpoints (completion, hover, go-to-definition, find references) to external editors via the language server protocol.")
+    Component(cli, "processing-java CLI", "Java", "Command line interface to build and run sketches without opening the PDE.")
+
+}
+
+/' Persons '/ 
+Person(user, "User", "Person who wants easily learn how to create graphic animations or quickly create a prototype.")
+
+/' External systems and containers '/
+Container(pde, "PDE", "Java", "PDE (processing development environment) is the user interface that allows to write and handle a sketch.")
+Container(sketch_process, "Sketch process", "Java", "Isolated JVM process that runs the compiled sketch. Hosts the PApplet instance and the active renderer engine.")
+System_Ext(os, "Operating system", "It handles the access to the computer's files and to accelerated hardware")
+System_Ext(external_ide, "External IDE", "External IDE that wants to use the processing language.")
+
+/' User relationships '/
+Rel(user, cli, "Writes commands", "CLI")
+
+/' PDE relationships '/ 
+Rel(pde, java_mode_coordinator, "Forwards commands (like run / stop / export)", "Method call")
+
+/' Java mode coordinator relationships '/ 
+Rel(java_mode_coordinator, preprocessor, "Sends .pde source files", "Method call")
+Rel(java_mode_coordinator, compiler, "Sends generated .java source", "Method call")
+Rel(java_mode_coordinator, runner, "Sends compiled .class files to execute them", "Method call")
+Rel(java_mode_coordinator, tweak_mode, "Triggers tweak mode", "Method call")
+Rel(java_mode_coordinator, sketch_process, "Sends updated parameters (for tweak mode)", "Socket")
+Rel(java_mode_coordinator, debugger, "Triggers debug session (like start / stop) and breakpoints", "Method call")
+
+/' Debugger relationships '/ 
+Rel(debugger, sketch_process, "Attaches and controls execution", "Socket")
+
+/' Compiler relationships '/ 
+Rel(compiler, error_checker, "Shares compilation diagnostics", "Method call")
+
+/' Runner relationships '/ 
+Rel(runner, sketch_process, "Spawns and monitors", "Socket")
+Rel(runner, os, "Requests child JVM spawn and temp folder paths", "OS API")
+
+/' Error checker relationships '/ 
+Rel(error_checker, compiler, "Triggers incremental compilation in background", "Method call")
+
+/' LSP relationships '/
+Rel(lsp_server, preprocessor, "Requires preprocessed AST for code intelligence", "Method call")
+Rel(lsp_server, compiler, "Requires compiler diagnostics for error reporting", "Method call")
+
+/' External IDE relationships '/
+Rel(external_ide, cli, "Calls the build tools", "CLI")
+Rel(external_ide, lsp_server, "Request a service", "Socket")
+
+/' CLI relationships '/
+Rel(cli, java_mode_coordinator, "Delegates commands", "Method call")
+
+
+@enduml

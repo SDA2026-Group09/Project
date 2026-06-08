@@ -1,0 +1,41 @@
+@startuml C4_component_sketch_process
+!include <C4/C4_Component>
+
+title Component diagram — Sketch process
+
+/' Components '/
+Container_Boundary(sketch_process, "Sketch process") {
+    Component(papplet, "PApplet", "Java", "Base class that every sketch extends. It exposes all drawing functions.")
+    Component(animation_loop, "Animation loop", "Java", "Dedicated thread that invokes setup() and draw() at the target frame rate, and dispatches input events received from the window manager to PApplet callbacks.")
+    Component(psurface, "Window manager", "Java / AWT", "The window manager that handles window lifecycle, OS-level input events.")
+    Component(pgraphics, "Render engine", "Java / Java2D / JOGL", "It executes the processing drawing functions like shapes, colors, typography, images and geometric transforms.")
+    Component(resource_management, "Resource management", "Java", "Provides utilities for handling fonts, images and shapes.")
+}
+
+/' External systems and containers '/
+Container(java_mode, "Java Mode", "Java", "Version of the processing language based on Java. It handles all the sketch lifecycle: preprocessing, compilation, built, execution. It offers also the possibility to debug the code and use the tweak mode.")
+System_Ext(os, "Operating System", "It handles the access to the computer's files and to accelerated hardware")
+
+/' Java Mode relationships '/
+Rel(java_mode, papplet, "Spawns process and communicates runtime messages", "Sockets")
+
+/' PApplet relationships '/
+Rel(papplet, animation_loop, "Starts and controls the animation loop", "Method call")
+Rel(papplet, psurface, "Delegates window creation and management", "Method call")
+Rel(papplet, pgraphics, "Drawing request", "Method call")
+Rel(papplet, resource_management, "Requests image, shape and font loading", "Method call")
+
+/' Animation loop relationships '/
+Rel(animation_loop, psurface, "Signals frame completion and requests display refresh", "Method call")
+Rel(animation_loop, papplet, "Invokes setup(), draw() and event callbacks", "Method call")
+
+/' Window manager relationships '/
+Rel(psurface, os, "Requests native window handle and display info", "OS API")
+
+/' Render engine relationships '/
+Rel(pgraphics, os, "Drawing requests to the GPU or CPU", "OS API")
+
+/' Resource management relationships '/
+Rel(resource_management, os, "Resolves data / folder path", "OS API")
+
+@enduml
